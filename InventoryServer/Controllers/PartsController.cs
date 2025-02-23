@@ -54,6 +54,8 @@ public class PartsController : ControllerBase
         {
             return BadRequest("New level must be non-negative!");
         }
+        using var transaction = await db.Database.BeginTransactionAsync();
+
         var part = await db.Parts.FindAsync(id);
         if (part == null)
         {
@@ -72,6 +74,8 @@ public class PartsController : ControllerBase
         });
         db.Parts.Update(part);
         await db.SaveChangesAsync();
+
+        await transaction.CommitAsync();
 
         return Ok();
     }
