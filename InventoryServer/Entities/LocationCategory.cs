@@ -16,7 +16,6 @@ public class LocationCategory
 
     required public ICollection<Location> Locations { get; set; }
 
-
     [NotMapped]
     public List<LocationCategory>? Subcategories { get; set; }
 }

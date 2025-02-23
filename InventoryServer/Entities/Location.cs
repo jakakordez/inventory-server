@@ -17,4 +17,7 @@ public class Location
 
     [JsonIgnore]
     public LocationCategory? Category { get; set; }
+
+    [JsonIgnore]
+    public List<Part>? Parts {  get; set; }
 }
