@@ -1,9 +1,12 @@
 ﻿using InventoryServer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace InventoryServer.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class PartsController : ControllerBase
@@ -36,16 +39,30 @@ public class PartsController : ControllerBase
         return Ok(existing);
     }
 
+    [HttpPost()]
+    public async Task<IActionResult> Add([FromBody] Part part)
+    {
+        part.Id = null;
+        part.StockLevel = 0;
+
+        db.Parts.Add(part);
+        await db.SaveChangesAsync();
+
+        return Ok(part);
+    }
+
     [HttpGet("{id}/history")]
     public async Task<IActionResult> GetEntries(
         [FromRoute] int id)
     {
-        return Ok(await db.StockEntries
+        var list = await db.StockEntries
+            .Include(e => e.User)
             .Where(p => p.PartId == id)
-            .ToListAsync());
+            .ToListAsync();
+        return Ok(list);
     }
 
-    [HttpPost("{id}/history")]
+    [HttpPut("{id}/history")]
     public async Task<IActionResult> UpdateStock(
         [FromRoute] int id, 
         [FromBody] StockChange change)
@@ -63,6 +80,11 @@ public class PartsController : ControllerBase
         }
         int levelChange = change.NewLevel - part.StockLevel;
 
+        var userId = User.Claims
+            .Where(c => c.Type == ClaimTypes.NameIdentifier)
+            .Select(c => (int?)Convert.ToInt32(c.Value))
+            .FirstOrDefault();
+
         part.StockLevel = change.NewLevel;
         db.StockEntries.Add(new StockEntry()
         {
@@ -70,7 +92,7 @@ public class PartsController : ControllerBase
             Change = levelChange,
             Comment = change.Comment,
             Timestamp = DateTime.Now,
-            UserId = 1
+            UserId = userId
         });
         db.Parts.Update(part);
         await db.SaveChangesAsync();

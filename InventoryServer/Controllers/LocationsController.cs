@@ -1,9 +1,11 @@
 ﻿using InventoryServer.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryServer.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class LocationsController : ControllerBase
@@ -41,6 +43,7 @@ public class LocationsController : ControllerBase
         [FromRoute] int id)
     {
         return await db.Parts
+            .Include(p => p.Entries)
             .Where(p => p.LocationId == id)
             .ToListAsync();
     }

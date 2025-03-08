@@ -10,6 +10,7 @@ public class DatabaseContext : DbContext
     public DbSet<Part> Parts { get; set; }
     public DbSet<PartCategory> PartCategories { get; set; }
     public DbSet<StockEntry> StockEntries { get; set; }
+    public DbSet<User> Users { get; set; }
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
@@ -27,6 +28,12 @@ public class DatabaseContext : DbContext
             .HasMany(e => e.Entries)
             .WithOne(e => e.Part)
             .HasForeignKey(e => e.PartId)
+            .HasPrincipalKey(e => e.Id);
+
+        modelBuilder.Entity<User>()
+            .HasMany(e => e.StockEntries)
+            .WithOne(e => e.User)
+            .HasForeignKey(e => e.UserId)
             .HasPrincipalKey(e => e.Id);
 
         modelBuilder.Entity<Location>()

@@ -16,7 +16,7 @@ public class Part
     required public string Name { get; set; }
 
     [Column("description")]
-    required public string Description { get; set; }
+    required public string? Description { get; set; }
 
     [Column("stockLevel")]
     public int StockLevel { get; set; }

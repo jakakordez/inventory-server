@@ -10,13 +10,13 @@ public class StockEntry
     public int? Id { get; set; }
 
     [Column("part_id")]
-    required public int PartId {  get; set; }
+    required public int? PartId {  get; set; }
 
     [Column("user_id")]
-    required public int UserId { get; set; }
+    required public int? UserId { get; set; }
 
     [Column("stockLevel")] 
-    required public decimal Change {  get; set; }
+    required public int Change {  get; set; }
 
     [Column("dateTime")]
     required public DateTime Timestamp { get; set; }
@@ -26,4 +26,6 @@ public class StockEntry
 
     [JsonIgnore]
     public Part? Part { get; set; }
+
+    public User? User { get; set; }
 }
