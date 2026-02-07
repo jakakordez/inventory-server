@@ -85,6 +85,11 @@ public class PartsController : ControllerBase
             .Select(c => (int?)Convert.ToInt32(c.Value))
             .FirstOrDefault();
 
+        if (userId == null)
+        {
+            return BadRequest("User not found");
+        }
+
         part.StockLevel = change.NewLevel;
         db.StockEntries.Add(new StockEntry()
         {
