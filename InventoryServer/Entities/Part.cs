@@ -25,7 +25,7 @@ public class Part
     required public int LocationId { get; set; }
 
     [NotMapped]
-    public DateTime? LastEntry => Entries?.Max(e => e.Timestamp);
+    public DateTime? LastEntry => Entries?.Any() == true ? Entries.Max(e => e.Timestamp) : null;
 
     [JsonIgnore]
     public PartCategory? Category { get; set; }
