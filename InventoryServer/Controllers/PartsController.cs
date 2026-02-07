@@ -107,6 +107,19 @@ public class PartsController : ControllerBase
         return Ok();
     }
 
+    [HttpGet("unchecked")]
+    public async Task<IActionResult> GetUncheckedParts()
+    {
+        var currentYear = DateTime.Now.Year;
+        
+        var parts = await db.Parts
+            .Include(p => p.Entries)
+            .Where(p => !p.Entries.Any(e => e.Timestamp.Year == currentYear))
+            .ToListAsync();
+
+        return Ok(parts);
+    }
+
     public class StockChange
     {
         required public int NewLevel { get; init; }
