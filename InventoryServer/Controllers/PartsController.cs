@@ -110,15 +110,53 @@ public class PartsController : ControllerBase
     [HttpGet("unchecked")]
     public async Task<IActionResult> GetUncheckedParts()
     {
-        var currentYear = DateTime.Now.Year;
-        
+        var year = DateTime.Now.Year;
+        if (HttpContext.Request.Query.TryGetValue("year", out var yearValue))
+        {
+            year = Convert.ToInt32(yearValue.ToString());
+        }
+
         var parts = await db.Parts
             .Include(p => p.Entries)
-            .Where(p => !p.Entries.Any(e => e.Timestamp.Year == currentYear))
+            .Where(p => !p.Entries.Any(e => e.Timestamp.Year == year))
             .ToListAsync();
 
         return Ok(parts);
     }
+
+    [HttpGet("report")]
+    public async Task<IActionResult> GetReport()
+    {
+        var year = DateTime.Now.Year;
+        if (HttpContext.Request.Query.TryGetValue("year", out var yearValue))
+        {
+            year = Convert.ToInt32(yearValue.ToString());
+        }
+
+        var changes = await db.StockEntries
+            .Include(e => e.Part)
+                .ThenInclude(p => p.Category)
+            .Include(e => e.Part)
+                .ThenInclude(p => p.Location)
+            .Where(e => e.Timestamp.Year == year)
+            .GroupBy(e => e.Part)
+            .ToListAsync();
+
+        var sum = changes
+            .Select(c => new ChangeSum(c.Key, c.Sum(ch => ch.Change)))
+            .Where(c => c.Change != 0);
+
+        var exporter = new TableExporter<ChangeSum>(sum);
+        exporter.AddColumn("ID", p => p.Part.Id, 10);
+        exporter.AddColumn("Name", p => p.Part.Name, 50);
+        exporter.AddColumn("Category", p => p.Part.Category.CategoryPath, 80);
+        exporter.AddColumn("Location", p => p.Part.Location.Name, 50);
+        exporter.AddColumn("Change", p => p.Change, 10);
+        exporter.AddColumn("Stock level", p => p.Part.StockLevel, 10);
+        return File(exporter.ExportToExcel(), "application/vnd.ms-excel");
+    }
+
+    private record ChangeSum(Part Part, int Change);
 
     public class StockChange
     {

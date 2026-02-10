@@ -15,6 +15,9 @@ public class PartCategory
     [Column("name")]
     required public string Name { get; set; }
 
+    [Column("categoryPath")]
+    public string CategoryPath { get; set; }
+
     [JsonIgnore]
     public List<Part>? Parts { get; set; }
 }
