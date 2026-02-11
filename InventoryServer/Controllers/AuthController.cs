@@ -36,7 +36,6 @@ public class AuthController : ControllerBase
     {
         var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]);
         var claims = new List<Claim> {
-            new Claim(ClaimTypes.NameIdentifier, user.Username),
             new Claim(ClaimTypes.Name, user.Username), 
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()!) 
         };
