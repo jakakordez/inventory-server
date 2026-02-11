@@ -118,7 +118,7 @@ public class PartsController : ControllerBase
 
         var parts = await db.Parts
             .Include(p => p.Entries)
-            .Where(p => !p.Entries.Any(e => e.Timestamp.Year == year))
+            .Where(p => !p.Entries.Any(e => e.Timestamp.Year == year) && p.StockLevel > 0)
             .ToListAsync();
 
         return Ok(parts);
